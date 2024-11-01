@@ -19,30 +19,63 @@ def inital_testing():
     print(gamefunctions.new_random_monster())
 
 
-    
+
 ##########################################
 
 
 
 global player_gold
 player_hp = 30
-player_gold = 10
+player_gold = 0
+player_inventory = {}
 
 def main(player_hp, player_gold):
     while True:
         gf.display_menu(player_hp, player_gold)
         choice = input("Choose an option: ")
+
+########################
+
         if choice == '1':
-            player_hp, player_gold = gf.fight_monster(player_hp, player_gold)
+            player_hp, player_gold = gf.fight_monster(player_hp, player_gold, player_inventory)
+
+########################
+
         elif choice == '2':
             if player_gold >= 5:
                 player_gold -= 5; player_hp = min(player_hp + 10, 30)
                 print("You feel rested. Your HP is restored.")
             else:
                 print("Not enough gold to sleep!")
+
+########################
+
         elif choice == '3':
+            item_purchased = gf.print_shop_menu('Sword', 10 ,'Scroll of Instant Death', 100, player_gold)
+            if 'Sword' in item_purchased:
+                player_gold -= 10
+                player_inventory.update(item_purchased) 
+            elif 'Scroll of Instant Death' in item_purchased:
+                player_gold -= 100
+                player_inventory.update(item_purchased) 
+            elif item_purchased == 'poor':
+                print('Come back when you have some more gold.')
+            elif item_purchased == 'bye':
+                print('Thanks for coming adventurer!\n\n')
+
+########################
+
+        elif choice == '4':
+            gf.display_inventory(player_inventory, player_gold)
+
+########################
+
+        elif choice == '5':
             print("Goodbye!"); break
         else:
-            print("Invalid choice. Please select 1, 2, or 3.")
+            print("Invalid choice. Please select a displayed number.")
+
+########################
+
 main(player_hp, player_gold)
     
