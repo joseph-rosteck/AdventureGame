@@ -138,6 +138,7 @@ def print_shop_menu(item1name, item1price, item2name, item2price, player_gold):
     choice = None
     item_purchased = None
     while choice != '3':
+        time.sleep(.3)
         print(
         
 
@@ -153,7 +154,7 @@ def print_shop_menu(item1name, item1price, item2name, item2price, player_gold):
         if choice == '1':
             if player_gold < 10:
                 return 'Poor'
-            print('Thank you for your purchase!')
+            time.sleep(.3)
             item_purchased = {
                 'Sword': {
                     'description': 'Doubles player damage.',
@@ -164,11 +165,10 @@ def print_shop_menu(item1name, item1price, item2name, item2price, player_gold):
             
             return item_purchased
         
-        
         elif choice == '2':
             if player_gold < 100:
                 return 'Poor'
-            print('Thank you for your purchase!')
+            time.sleep(.3)
             item_purchased = {
                 'Scroll of Instant Death': {
                     'description': ' Instantly kills your enemy.',
@@ -182,28 +182,13 @@ def print_shop_menu(item1name, item1price, item2name, item2price, player_gold):
             return 'bye'
         
 ####################################
-def shop_and_names_test():
-    print("print_welcome tests with names Bob, Ashley, and Bartholomew")
-    print_welcome('Bob')
-    print_welcome('Ashley')
-    print_welcome('Bartholomew')
-    print()
-    print("print_shop_menu tests with Pear, 1.56, Bucket, 5.2")
-    print_shop_menu("Pear",1.56,"Bucket",5.20)
-    print()
-    print("print_shop_menu tests with Broadsword, 20, Apple, 5.21111")
-    print_shop_menu("Broadsword",20,"Apple",5.21111)
-    print()
-    print("print_shop_menu tests with Donkey, 109.99, Orange, 6")
-    print_shop_menu("Donkey",109.99,"Orange",6)
-
-####################################
 
 import random
 import time
 
 ####################################
 
+# No longer used, all relevent use is now in print_shop_menu
 def purchase_item(itemPrice, player_gold, quantityToPurchase=1):
     '''Simulates purchasing items from the shop, returning the number of items purchased 
    and the leftover money.
@@ -292,7 +277,8 @@ def display_menu(player_hp, player_gold):
     print("2) Sleep (Restore 10 HP for 5 Gold)")
     print("3) Shop")
     print("4) Inventory")
-    print("5) Quit")
+    print("5) Save Game")
+    print("6) Quit")
 
 ####################################
 
@@ -315,12 +301,11 @@ def fight_monster(player_hp, player_gold, player_inventory):
     monster_min_power = monster_stats["power"] // 2
     monster_max_power = monster_stats["power"]
     print(f'\nYou stumbled upon a {monster_stats["name"]}! Its power is {monster_stats["power"]}')
-    print(player_inventory)
     
      # Loop until either the player or the monster is defeated
     while player_hp > 0 and monster_hp > 0:
         print(f'\nMonster Hp: {monster_hp}   Player Hp: {player_hp}\n')
-        action = input('1) Attack!\n2) Run away.\n3) Consumables.\n4) Exit ')
+        action = input('1) Attack!\n2) Run away.\n3) Consumables.\n4) Exit\n')
         
          # Calculate damage dealt to monster and player
         if action == '1':
@@ -370,7 +355,7 @@ def fight_monster(player_hp, player_gold, player_inventory):
         elif action == '4':
             print("Exiting the game.\n")
             time.sleep(1)
-            break
+            quit()
         else:
             print('Please choose 1, 2, or 3.')
 
@@ -494,7 +479,7 @@ def display_inventory(player_inventory, player_gold):
                 equipped = 'N/A'
             else:
                 equipped = "No" if item_details['equipped'] else "Yes"
-            print(f'| {item_nums}) {item_name:<21} | {description:<37} | {item_type:<10} | {equipped:<9} |')
+            print(f'| {item_nums}) {item_name:<22} | {description:<37} | {item_type:<10} | {equipped:<9} |')
             item_nums = item_nums + 1
 
         print(bottom_border)
