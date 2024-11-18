@@ -162,6 +162,7 @@ def print_shop_menu(item1name, item1price, item2name, item2price, player_gold):
                     'equipped': 1
                 }
             }
+            print('Thanks for the Purchase!')
             
             return item_purchased
         
@@ -221,7 +222,7 @@ def new_random_monster():
    Returns:
    - dict: A dictionary containing the monster's name, description, health, power, 
      and the amount of money it can drop.'''
-    
+
     names = ['Goblin', 'Troll', 'Dragon']
     
     descriptions = {

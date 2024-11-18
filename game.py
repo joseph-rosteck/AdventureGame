@@ -2,7 +2,6 @@ import gamefunctions
 import json
 import time
 gf = gamefunctions
-#test
 
 ##########################################
 
