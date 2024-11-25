@@ -1,24 +1,31 @@
 import pygame
-import math
-import time
 import gamefunctions
+import graphicsFunctions
+import random
+GF = graphicsFunctions
 
 pygame.init()
 
 # Initalizes variables
 screen_height = 600
 screen_width = 800
+grid_height = 320
+grid_width = 320
 white = (255,255,255)
 black = (0,0,0)
 green = (0,255,0)
 red = (255,0,0)
 blue = (0,0,255)
-player_gold = 0
+player_gold = 50
 player_hp = 30
 player_inventory = {}
 interaction_active = False
 shop_visited = False
 monster_fought = False
+game_state = "PLAY" # Possible states are PLAY, INVENTORY, REST, SHOP, FIGHT
+player_moves = 0 # Tracks player moves for monster movement 
+
+monsters = [] # List for all active monsters
 
 
 
@@ -44,14 +51,26 @@ def create_circle(screen, xgrid , ygrid, radius, color):
     x = (32 * xgrid - 16)
     y = (32 * ygrid - 16)
     pygame.draw.circle(screen, color, (x, y), radius)
-    hitbox = pygame.Rect(
-    x - radius,  # Top left x
-    y - radius,  # Top left y
-    radius * 2, # Width
-    radius * 2  # Height
-    )
-    return hitbox
+    return pygame.Rect(x - radius, y - radius, radius * 2, radius * 2)
 
+class WanderingMonster:
+    def __init__(self, grid_width, grid_height):
+        self.x = random.randint(0, grid_width // 32 - 1) * 32 
+        self.y = random.randint(0, grid_height // 32 - 1) * 32
+        self.monster_data = gamefunctions.new_random_monster()
+
+    def move(self, grid_width, grid_height):
+        """Moves the monster in a random direction within grid bounds."""
+        directions = [(0, -32), (0, 32), (-32, 0), (32,0)]
+        dx, dy = random.choice(directions)
+        new_x = self.x + dx
+        new_y = self.y + dy
+        if 0 <= new_x < grid_width and 0 <= new_y < grid_height:
+            self.x, self.y = new_x, new_y
+
+    def collides_with_player(self, player_rect):
+        """Checks if the monster collides with you."""
+        return pygame.Rect(self.x, self.y, 32, 32).colliderect(player_rect)
 
 # Creates screen 
 screen = pygame.display.set_mode((screen_width, screen_height))
@@ -59,6 +78,36 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 player = pygame.Rect(4,4,24,24) 
 # How many pixels per movement
 movement_amount = 32
+
+def draw_game():
+    # Draws Screen
+    screen.fill(black)
+    # Draws Player
+    pygame.draw.rect(screen, blue, player)
+    # Draws 10 by 10 white grid
+    for row in range(10):
+        for col in range(10):
+            x = col * 32
+            y = row * 32
+            pygame.draw.rect(screen, white, (y, x, 32, 32), 1)
+    for monster in monsters:
+        #pygame.draw.rect(screen, red, (monster.x, monster.y, 32, 32))
+        row = 1
+        columns = range(1, 11)
+        excluded_squares = [(1, 1), (1, 10)]
+        valid_squares = [(row, col) for col in columns if (row, col) not in excluded_squares]
+        chosen_square = random.choice(valid_squares)
+        x = (chosen_square[1] - 1) * 32 + 16  
+        y = (chosen_square[0] - 1) * 32 + 16  
+        create_circle(screen, monster.x // 32 + 1, monster.y // 32 + 1, 14, red)
+
+    #TODO For inventory functions
+    #item_nums = 1 
+    #for item_name, item_details in player_inventory.items():
+     #   description = item_details['description']
+      #  item_type = item_details['itemtype']
+      #  item_text = font.render(item_name, True, white)
+     #   screen.blit(item_text, (50, 100 + item_name * 40))
 
 clock = pygame.time.Clock()
 
@@ -68,31 +117,27 @@ running = True
 while running:
 ##############################
 
-    # Draws screen
-    screen.fill((0,0,0))
+    if game_state == "PLAY":
+        draw_game()
 
-    # Draws player
-    pygame.draw.rect(screen, (255, 0, 0), player)
+        # Draws 10 by 10 white grid
+        for row in range(10):
+            for col in range(10):
+                x = col * 32
+                y = row * 32
+                pygame.draw.rect(screen, white, (y, x, 32, 32), 1)
 
-    # Draws 10 by 10 white grid
-    for row in range(10):
-        for col in range(10):
-            x = col * 32
-            y = row * 32
-            pygame.draw.rect(screen, white, (y, x, 32, 32), 1)
+        # Draws test button
+        button1 = create_button(screen, 400, 10, 150, 50, white, "Inventory", black)
+        button2 = create_button(screen, 400, 70, 150, 50, white, "quit", black) 
 
-    # Draws test button
-    #button1 = create_button(screen, 400, 10, 150, 50, white, "Inventory", black)
-    #button2 = create_button(screen, 400, 70, 150, 50, white, "quit", black) 
 
-    # Defines the total size of the grid
-    grid_height = 320
-    grid_width = 320
-
-    # Draw the green shop circle
-    shop_circle = create_circle(screen, 10, 1, 14, green)
-    # Draw the red monster circle
-    monster_circle = create_circle(screen, 10, 10, 14, red)
+        # Draw the green shop circle
+        shop_circle = create_circle(screen, 10, 1, 14, green)
+        
+    # TODO make inventory gui function
+    #if game_state == "INVENTORY":
+        #game_inventory(player_inventory, player_gold, screen)
 
     
 ##############################
@@ -120,14 +165,21 @@ while running:
                     new_x += movement_amount
 
                 player.x, player.y = new_x, new_y
+                player_moves += 1
+
+                # Moves each monster if necessary
+                if player_moves == 2:
+                    for monster in monsters:
+                        monster.move(grid_width, grid_height)
+                    player_moves = 0
                                         
 
-            #elif event.type == pygame.MOUSEBUTTONDOWN:
-                #mouse_pos = pygame.mouse.get_pos()
-                #if button1.collidepoint(mouse_pos):
-                #    print("pressed inventory")
-                #elif button2.collidepoint(mouse_pos):
-                #    print("pressed quit")
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if button1.collidepoint(mouse_pos):
+                    game_state = "INVENTORY"
+                elif button2.collidepoint(mouse_pos):
+                    print("pressed quit")
 
     if not interaction_active:
         if player.colliderect(shop_circle) and not shop_visited:
@@ -136,20 +188,21 @@ while running:
             gamefunctions.print_shop_menu('Sword', 10.00, 'Fire Scroll', 20.00, player_gold)
             interaction_active = False  # Unlock inputs after interaction
 
-        elif player.colliderect(monster_circle) and not monster_fought:
-            interaction_active = True  # Block inputs
-            monster_fought = True  # Mark the monster as fought
-            fmreturn = gamefunctions.fight_monster(player_hp, player_gold, player_inventory)
-            player_hp, player_gold = fmreturn
-            interaction_active = False  # Unlock inputs after interaction
+        
 
     # Reset flags when the player leaves the hitbox
     if not player.colliderect(shop_circle):
         shop_visited = False
-    if not player.colliderect(monster_circle):
-        monster_fought = False
 
-##############################
+    for monster in monsters[:]:
+        if monster.collides_with_player(player):
+            print(f'Encounter with {monster.monster_data['name']}!')
+            player_hp, player_gold = gamefunctions.fight_monster(player_hp, player_gold, player_inventory)
+            monsters.remove(monster)
+            
+    if not monsters:
+        for _ in range(2):
+            monsters.append(WanderingMonster(grid_width, grid_height))
 
 
     # Updates display

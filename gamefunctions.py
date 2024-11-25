@@ -186,6 +186,7 @@ def print_shop_menu(item1name, item1price, item2name, item2price, player_gold):
 
 import random
 import time
+import pygame
 
 ####################################
 
@@ -222,8 +223,10 @@ def new_random_monster():
    Returns:
    - dict: A dictionary containing the monster's name, description, health, power, 
      and the amount of money it can drop.'''
+    
 
     names = ['Goblin', 'Troll', 'Dragon']
+    weights = [15, 4, 1]
     
     descriptions = {
     "Goblin": "This is a lone goblin. When it notices you, it rushes at you quickly with a sharp dagger drawn.",
@@ -247,7 +250,7 @@ def new_random_monster():
     "Dragon": (100, 500),
     }
 
-    name = random.choice(names)
+    name = random.choices(names, weights, k=1)[0]
     description = descriptions[name]
     health = random.randint(*health_ranges[name])
     power = random.randint(*power_ranges[name])
@@ -512,3 +515,5 @@ def display_inventory(player_inventory, player_gold):
             break
         else:
             print("Invalid option. Please choose again.")
+
+
