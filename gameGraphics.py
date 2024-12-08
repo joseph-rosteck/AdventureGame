@@ -27,6 +27,19 @@ player_moves = 0 # Tracks player moves for monster movement
 
 monsters = [] # List for all active monsters
 
+# Loads Player and Monster images
+try:
+    player_image = pygame.image.load("Player.png")
+except FileNotFoundError:
+    print("Player image failed to load.")
+    player_image = None
+
+try:
+    monster_image = pygame.image.load("Monster.png")
+except FileNotFoundError:
+    print("Monster image failed to load.")
+    monster_image = None
+
 
 
 # Creates object for buttons
@@ -75,7 +88,7 @@ class WanderingMonster:
 # Creates screen 
 screen = pygame.display.set_mode((screen_width, screen_height))
 # Defines player size and where you spawn 
-player = pygame.Rect(4,4,24,24) 
+player = pygame.Rect(4,4,24,24)
 # How many pixels per movement
 movement_amount = 32
 
@@ -83,25 +96,30 @@ def draw_game():
     # Draws Screen
     screen.fill(black)
     # Draws Player
-    pygame.draw.rect(screen, blue, player)
+    if player_image:
+        player_image_scaled = pygame.transform.scale(player_image, (32, 32))
+        screen.blit(player_image_scaled, (player.x, player.y))
+    else:
+        pygame.draw.rect(screen, blue, player)
+
+
     # Draws 10 by 10 white grid
     for row in range(10):
         for col in range(10):
             x = col * 32
             y = row * 32
-            pygame.draw.rect(screen, white, (y, x, 32, 32), 1)
-    for monster in monsters:
-        #pygame.draw.rect(screen, red, (monster.x, monster.y, 32, 32))
-        row = 1
-        columns = range(1, 11)
-        excluded_squares = [(1, 1), (1, 10)]
-        valid_squares = [(row, col) for col in columns if (row, col) not in excluded_squares]
-        chosen_square = random.choice(valid_squares)
-        x = (chosen_square[1] - 1) * 32 + 16  
-        y = (chosen_square[0] - 1) * 32 + 16  
-        create_circle(screen, monster.x // 32 + 1, monster.y // 32 + 1, 14, red)
+            pygame.draw.rect(screen, black, (y, x, 32, 32), 1)
 
-    #TODO For inventory functions
+    # Draw monsters
+        for monster in monsters:
+            if monster_image:
+                monster_image_scaled = pygame.transform.scale(monster_image, (32, 32))
+                screen.blit(monster_image_scaled, (monster.x, monster.y))
+            else:
+                create_circle(screen, monster.x // 32 + 1, monster.y // 32 + 1, 14, red)
+
+
+    # TODO For inventory functions
     #item_nums = 1 
     #for item_name, item_details in player_inventory.items():
      #   description = item_details['description']
@@ -134,7 +152,6 @@ while running:
 
         # Draw the green shop circle
         shop_circle = create_circle(screen, 10, 1, 14, green)
-        
     # TODO make inventory gui function
     #if game_state == "INVENTORY":
         #game_inventory(player_inventory, player_gold, screen)
