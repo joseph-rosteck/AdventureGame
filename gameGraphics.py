@@ -1,8 +1,6 @@
 import pygame
 import gamefunctions
-import graphicsFunctions
 import random
-GF = graphicsFunctions
 
 pygame.init()
 
